@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>烟台3日长辈慢节奏行程地图</title>
+<meta name="description" content="烟台3日长辈慢节奏行程：按天筛选、地图联动、餐饮住宿建议" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root{
+  --bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--muted:#86868b;--line:rgba(60,60,67,.14);
+  --accent:#0071e3;--hotel:#7c3aed;--food:#ff3b30;--spot:#007aff;--transport:#8e8e93;
+  --day1:#ff9500;--day2:#34c759;--day3:#af52de;--shadow:0 4px 18px rgba(0,0,0,.08);
+  --radius:16px;--safe-bottom:env(safe-area-inset-bottom,0px)
+}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Microsoft YaHei",Arial,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.45}
+a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+#map{width:100%;height:42vh;min-height:300px;position:sticky;top:0;z-index:100;background:#dbeafe}
+.tabs{display:flex;gap:8px;padding:12px 14px;overflow-x:auto;-webkit-overflow-scrolling:touch;background:rgba(255,255,255,.86);backdrop-filter:saturate(180%) blur(18px);position:sticky;top:42vh;z-index:99;border-bottom:.5px solid var(--line);scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;border:0;border-radius:999px;padding:8px 15px;background:#e9e9ee;color:#4b5563;font-size:14px;font-weight:650;cursor:pointer;transition:.18s}.tab:active{transform:scale(.96)}.tab.active{background:var(--accent);color:#fff}.tab[data-day="1"].active{background:var(--day1)}.tab[data-day="2"].active{background:var(--day2)}.tab[data-day="3"].active{background:var(--day3)}
+.content{max-width:760px;margin:0 auto;padding:16px 15px calc(30px + var(--safe-bottom))}.hero{text-align:center;padding:16px 10px 18px}.hero h1{margin:0;font-size:28px;line-height:1.15;letter-spacing:-.03em}.hero p{margin:7px 0 0;color:var(--muted);font-size:15px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}.info{background:var(--card);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow)}.label{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.03em}.value{margin-top:4px;font-weight:700;font-size:15px}
+.section-title{margin:24px 0 9px;color:var(--muted);font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}.day-section{display:block}.day-head{padding:8px 0 12px}.day-head h2{margin:0;font-size:23px;letter-spacing:-.02em}.day-head p{margin:4px 0 0;color:var(--muted);font-size:14px}.route{white-space:pre-line;background:var(--card);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow);color:#4b5563;font-size:13px;margin-bottom:14px}.route b{color:var(--text)}
+.timeline{position:relative;padding-left:26px}.timeline:before{content:"";position:absolute;left:8px;top:18px;bottom:16px;width:1.5px;background:var(--line)}.tl-item{position:relative;margin-bottom:10px}.dot{position:absolute;left:-23px;top:18px;width:11px;height:11px;border-radius:50%;box-shadow:0 0 0 4px var(--bg);z-index:1}.dot.hotel{background:var(--hotel)}.dot.food{background:var(--food)}.dot.spot{background:var(--spot)}.dot.transport{background:var(--transport)}
+.card{background:var(--card);border-radius:14px;padding:14px 15px;box-shadow:var(--shadow);cursor:pointer;transition:.18s}.card:active{transform:scale(.992)}.card.highlight{outline:3px solid rgba(0,113,227,.22)}.time{font-size:12px;color:var(--muted);font-weight:750}.name{font-size:17px;font-weight:750;margin:3px 0 4px;letter-spacing:-.01em;display:flex;gap:6px;align-items:center;flex-wrap:wrap}.desc{font-size:14px;color:#667085}.detail{margin-top:10px;padding-top:10px;border-top:.5px solid var(--line);font-size:13px;color:#667085}.badge{font-size:11px;font-weight:800;border-radius:5px;padding:2px 7px}.badge.food{background:rgba(255,59,48,.1);color:var(--food)}.badge.spot{background:rgba(0,122,255,.1);color:var(--spot)}.badge.hotel{background:rgba(124,58,237,.1);color:var(--hotel)}.badge.transport{background:rgba(142,142,147,.12);color:#5f6368}.links{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.btn{display:inline-flex;padding:7px 12px;border-radius:10px;background:var(--accent);color:#fff!important;font-size:13px;font-weight:700;text-decoration:none!important}.btn.gray{background:#64748b}.btn.food{background:var(--food)}
+.overview-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;margin-bottom:10px}.hotel-list .overview-card{border-left:5px solid var(--hotel)}.tips{border-left:5px solid #f59e0b;color:#4b5563;font-size:14px}.mini{font-size:12px;color:var(--muted);margin-top:4px}.leaflet-popup-content-wrapper{border-radius:14px!important}.leaflet-popup-content{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif!important;font-size:14px!important;line-height:1.45!important}.locate{width:36px;height:36px;border:0;border-radius:10px;background:rgba(255,255,255,.92);box-shadow:0 1px 5px rgba(0,0,0,.25);font-size:18px;cursor:pointer}
+@media(min-width:980px){body{display:grid;grid-template-columns:440px 1fr;grid-template-rows:auto 1fr}#map{grid-column:2;grid-row:1 / span 2;height:100vh;min-height:100vh;position:sticky}.tabs{grid-column:1;grid-row:1;top:0}.content{grid-column:1;grid-row:2;max-height:calc(100vh - 58px);overflow:auto;padding-top:12px}.hero{text-align:left}.grid{grid-template-columns:1fr}.content::-webkit-scrollbar{width:8px}.content::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:999px}}
+@media(max-width:560px){.grid{grid-template-columns:1fr 1fr}.hero h1{font-size:24px}.content{padding-left:12px;padding-right:12px}.tabs{top:42vh}.tab{font-size:13px;padding:8px 13px}}
+</style>
+</head>
+<body>
+<div id="map"></div>
+<nav class="tabs" aria-label="按天筛选行程">
+  <button class="tab active" data-day="all">全部</button>
+  <button class="tab" data-day="1">Day 1 市区海岸</button>
+  <button class="tab" data-day="2">Day 2 酒庄</button>
+  <button class="tab" data-day="3">Day 3 养马岛</button>
+  <button class="tab" data-day="hotel">住宿</button>
+</nav>
+<main class="content">
+  <section class="hero">
+    <h1>烟台3日长辈慢节奏行程</h1>
+    <p>按天筛选地图标记｜点时间线定位到地图｜餐饮以顺路、热菜、少排队为主</p>
+  </section>
+  <section class="grid">
+    <div class="info"><div class="label">节奏</div><div class="value">每天一个主片区，午饭后可休息</div></div>
+    <div class="info"><div class="label">交通</div><div class="value">市区打车，酒庄建议包车</div></div>
+    <div class="info"><div class="label">住宿</div><div class="value">三星或无星级均可，优先市区海岸线</div></div>
+    <div class="info"><div class="label">饮食</div><div class="value">热菜面食汤类，海鲜每天最多一顿</div></div>
+  </section>
+
+  <h3 class="section-title hotel-section">住宿候选</h3>
+  <section class="hotel-list hotel-section" id="hotelList"></section>
+
+  <section class="day-section" data-day="1">
+    <div class="day-head"><h2>Day 1｜市区海岸适应</h2><p>烟台山、朝阳街/所城里、月亮湾，第一天低强度。</p></div>
+    <div class="route"><b>路线：</b>酒店 → 午餐 → 烟台山 → 朝阳街/所城里 → 晚餐 → 月亮湾散步
+<b>策略：</b>如果抵达较晚，只保留烟台山 + 月亮湾。</div>
+    <div class="timeline" id="day1"></div>
+  </section>
+
+  <section class="day-section" data-day="2">
+    <div class="day-head"><h2>Day 2｜烟台特色酒庄慢游</h2><p>去掉蓬莱阁，改成张裕酒文化博物馆/葡萄酒庄参观，更适合长辈慢节奏。</p></div>
+    <div class="route"><b>路线：</b>酒店 → 张裕酒文化博物馆 → 午餐 → 张裕卡斯特酒庄/城市海岸休息 → 回酒店
+<b>策略：</b>若不想远行，只保留市区张裕酒文化博物馆 + 滨海路休息；若想看葡萄园，再包车去酒庄。</div>
+    <div class="timeline" id="day2"></div>
+  </section>
+
+  <section class="day-section" data-day="3">
+    <div class="day-head"><h2>Day 3｜养马岛看海收尾</h2><p>坐车环岛 + 选点下车看海，不全程步行。</p></div>
+    <div class="route"><b>路线：</b>酒店 → 养马岛 → 午餐 → 渔人码头/第二海水浴场 → 返程或休息
+<b>策略：</b>当天返程就不加下午景点。</div>
+    <div class="timeline" id="day3"></div>
+  </section>
+
+  <h3 class="section-title">长辈出行提醒</h3>
+  <section class="overview-card tips">
+    <b>餐饮筛选原则：</b>优先参考小红书近期真实体验，但不盲追网红；看具体店名、地址、菜品、排队和避坑，再按是否顺路、是否适合长辈筛选。<br><br>
+    1. 每天午饭后尽量回酒店或找咖啡/茶馆休息 1.5—2 小时。<br>
+    2. 酒庄日如去张裕卡斯特酒庄，建议包车；若只去市区张裕酒文化博物馆，打车即可。<br>
+    3. 海边风大，带薄外套；鞋要防滑。<br>
+    4. 海鲜少吃生冷，景区门口拉客店谨慎。<br>
+    5. 地图点位已按 OSM/Nominatim 的 WGS-84 坐标重新校核；少数酒店为区域参考点，订房前请电话确认门牌/导航点。
+  </section>
+</main>
+<script>
+const hotels=[
+ {id:'h1',name:'烟台东方海洋月亮湾大酒店（区域参考）',lat:37.5341039,lng:121.4257176,type:'hotel',day:'hotel',time:'住宿首选',tag:'财政部定点 · 3星 · 位置待电话确认',desc:'电话：0535-6583588。OSM 未精确收录该酒店，地图暂放在月亮湾区域中心；订房前请电话确认门牌/导航点。'},
+ {id:'h2',name:'烟台东山宾馆',lat:37.5273456,lng:121.4321174,type:'hotel',day:'hotel',time:'无星级优先备选',tag:'财政部定点 · 无星级 · OSM已校核',desc:'电话：0535-6589966。财政部列表为无星级；OSM 可识别到东山宾馆，靠近东山/月亮湾一带。'},
+ {id:'h3',name:'烟台东方海天酒店（区域参考）',lat:37.5197603,lng:121.4442037,type:'hotel',day:'hotel',time:'无星级海岸备选',tag:'财政部定点 · 无星级 · 位置待电话确认',desc:'电话：0535-6888199。OSM 未精确收录该酒店，地图暂放在第二海水浴场/渔人码头区域；订房前请电话确认门牌/导航点。'},
+ {id:'h4',name:'山东机械大厦（区域参考）',lat:37.5380237,lng:121.3812527,type:'hotel',day:'hotel',time:'三星市区备选',tag:'财政部定点 · 3星 · 位置待电话确认',desc:'电话：0535-6224561。OSM 未精确收录该酒店，地图暂放在南大街/中心大酒店附近市区区域；订房前请电话确认门牌/导航点。'},
+ {id:'h5',name:'烟台百纳瑞汀酒店',lat:37.5358531,lng:121.4087014,type:'hotel',day:'hotel',time:'无星级市区备选',tag:'财政部定点 · 无星级 · OSM已校核',desc:'电话：0535-6862888。财政部列表为无星级；OSM 可识别到百纳瑞汀酒店，市区海岸线附近，位置便利。'},
+ {id:'h6',name:'烟台中心大酒店',lat:37.5380237,lng:121.3812527,type:'hotel',day:'hotel',time:'舒适备选',tag:'财政部定点 · 4星 · OSM已校核',desc:'电话：0535-6584868。OSM 可识别到中心大酒店；预算稍宽松时可选，市区配套通常更稳。'}
+];
+const items=[
+ {id:'d1a',day:1,time:'11:30',name:'Day1午餐区域：市区鲁菜/海鲜家常菜',lat:37.5429799,lng:121.3965513,type:'food',tag:'午餐',desc:'候选：蓬莱春、东顺馆、旺角小渔村市区店、酒店附近鲁菜馆。长辈友好点法：鲅鱼水饺、海鲜疙瘩汤、清蒸鱼、炒时蔬；第一顿少吃凉拌贝类和生腌。'},
+ {id:'d1b',day:1,time:'14:00',name:'烟台山景区',lat:37.5470425,lng:121.3965291,type:'spot',tag:'景点',desc:'看海、老建筑、灯塔，走核心区即可，1.5—2小时。'},
+ {id:'d1c',day:1,time:'16:30',name:'朝阳街 / 所城里',lat:37.5429799,lng:121.3965513,type:'spot',tag:'轻松逛',desc:'朝阳街适合拍照散步；所城里更有老城烟火气。二选一即可。'},
+ {id:'d1d',day:1,time:'18:00',name:'Day1晚餐区域：滨海路/市区海鲜家常菜',lat:37.5358531,lng:121.4087014,type:'food',tag:'晚餐',desc:'候选：旺角小渔村、荣祥海鲜、本地海鲜家常菜馆。晚餐建议少而精：清蒸鱼/蒸海鲜、海鲜疙瘩汤、鲅鱼水饺、热炒青菜；避开明显拉客和排队过长的店。'},
+ {id:'d1e',day:1,time:'19:30',name:'月亮湾散步',lat:37.5341039,lng:121.4257176,type:'spot',tag:'散步',desc:'晚饭后沿海边慢走，第一天早点回酒店休息。'},
+ {id:'d2a',day:2,time:'09:30',name:'酒店 → 张裕酒文化博物馆',lat:37.5421,lng:121.3919,type:'transport',tag:'出发',desc:'市区打车前往即可，上午不必太早。张裕酒文化博物馆比蓬莱往返轻松，适合长辈慢慢参观。'},
+ {id:'d2b',day:2,time:'10:00',name:'张裕酒文化博物馆',lat:37.5421,lng:121.3919,type:'spot',tag:'核心参观',desc:'烟台葡萄酒特色代表，室内参观为主，强度低；可了解张裕历史、地下酒窖和葡萄酒文化。'},
+ {id:'d2c',day:2,time:'12:30',name:'Day2午餐：市区鲁菜/胶东家常菜',lat:37.5380237,lng:121.3812527,type:'food',tag:'午餐',desc:'候选：蓬莱春、东顺馆、酒店附近鲁菜馆。建议热菜、面食和汤类，不饮酒或少量品尝即可。'},
+ {id:'d2d',day:2,time:'14:30',name:'张裕卡斯特酒庄 / 滨海路休息二选一',lat:37.5757755,lng:121.1737103,type:'spot',tag:'下午备选 · OSM已校核',desc:'张裕卡斯特酒庄：OSM/Nominatim 校核地址为烟台经济技术开发区古现街道金华路附近。体力好且想看葡萄园/酒庄可包车前往；若父母上午已累，则不远行，改为滨海路/咖啡茶馆休息。'},
+ {id:'d2e',day:2,time:'18:00',name:'酒店附近清淡晚餐',lat:37.5358531,lng:121.4087014,type:'food',tag:'晚餐',desc:'候选：酒店附近鲁菜/家常菜、粥汤面食、福山大面。酒庄日不建议晚餐再远距离打卡，选近、热乎、能坐下休息的。'},
+ {id:'d3a',day:3,time:'09:00',name:'酒店 → 养马岛',lat:37.4658736,lng:121.6205904,type:'transport',tag:'出发',desc:'岛上以坐车环岛 + 挑点下车看海为主，不全程步行。'},
+ {id:'d3b',day:3,time:'10:00',name:'养马岛',lat:37.4658736,lng:121.6205904,type:'spot',tag:'看海',desc:'选2—3个海景点即可，风大带外套。'},
+ {id:'d3c',day:3,time:'12:30',name:'养马岛/牟平午餐区域',lat:37.4558000,lng:121.5920000,type:'food',tag:'午餐',desc:'候选：养马岛岛内渔家乐、牟平区本地海鲜家常菜、胶东家常菜馆。点热菜、鱼、鲅鱼水饺/面食和汤；不建议吃太多冷盘贝类。'},
+ {id:'d3d',day:3,time:'15:00',name:'烟台渔人码头 / 第二海水浴场',lat:37.5183674,lng:121.4473423,type:'spot',tag:'下午备选',desc:'喜欢拍照选渔人码头；体力一般选海水浴场。当天返程则直接回酒店取行李。'},
+ {id:'d3e',day:3,time:'17:30',name:'返程前简餐',lat:37.5380237,lng:121.3812527,type:'food',tag:'晚餐',desc:'候选：福山大面、鲅鱼水饺、酒店附近简餐/鲁菜。返程日以离酒店或车站近、不排队、不耽误交通为第一原则。'}
+];
+const allPlaces=[...hotels,...items];
+const dayColors={1:'#ff9500',2:'#34c759',3:'#af52de',hotel:'#7c3aed'};
+const map=L.map('map',{scrollWheelZoom:true}).setView([37.55,121.25],10);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(map);
+const markers=new Map();
+// 坐标说明：本版点位已按 OSM/Nominatim 校核为 WGS-84，直接用于 Leaflet/OSM；不再做 GCJ-02 二次转换。
+function osmCoord(p){return [p.lat,p.lng];}
+function amapUrl(p){return `https://uri.amap.com/search?keyword=${encodeURIComponent(p.name)}&city=烟台&view=map`;}
+function markerIcon(p){const color=p.type==='hotel'?'#7c3aed':p.type==='food'?'#ff3b30':p.type==='transport'?'#8e8e93':dayColors[p.day]||'#007aff';const label=p.type==='hotel'?'住':p.type==='food'?'食':p.type==='transport'?'车':p.day;return L.divIcon({className:'',html:`<div style="width:28px;height:28px;border-radius:50%;background:${color};border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.28);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:12px">${label}</div>`,iconSize:[28,28],iconAnchor:[14,14]});}
+function popupHtml(p){return `<b>${p.name}</b><br><span style="color:#667085">${p.time||''} ${p.tag||''}</span><br>${p.desc}<br><br><a href="${amapUrl(p)}" target="_blank">高德搜索/导航</a>`;}
+function makeCard(p){return `<div class="tl-item" data-id="${p.id}"><span class="dot ${p.type}"></span><article class="card" data-id="${p.id}"><div class="time">${p.time}</div><div class="name">${p.name}<span class="badge ${p.type}">${p.tag}</span></div><div class="desc">${p.desc}</div><div class="links"><a class="btn ${p.type==='food'?'food':''}" href="${amapUrl(p)}" target="_blank">高德搜索/导航</a></div></article></div>`;}
+function render(){document.getElementById('hotelList').innerHTML=hotels.map(p=>`<article class="overview-card" data-id="${p.id}"><div class="time">${p.time}</div><div class="name">${p.name}<span class="badge hotel">${p.tag}</span></div><div class="desc">${p.desc}</div><div class="links"><a class="btn" href="${amapUrl(p)}" target="_blank">高德搜索/导航</a></div></article>`).join('');[1,2,3].forEach(d=>{document.getElementById('day'+d).innerHTML=items.filter(p=>p.day===d).map(makeCard).join('')});document.querySelectorAll('[data-id]').forEach(el=>{el.addEventListener('click',e=>{if(e.target.tagName==='A')return;focusPlace(el.dataset.id,true);});});}
+function drawMarkers(filter='all'){markers.forEach(m=>map.removeLayer(m));markers.clear();let show=allPlaces.filter(p=>filter==='all'||String(p.day)===String(filter)||(filter==='hotel'&&p.type==='hotel'));show.forEach(p=>{const m=L.marker(osmCoord(p),{icon:markerIcon(p)}).addTo(map).bindPopup(popupHtml(p));m.on('click',()=>highlightCard(p.id));markers.set(p.id,m);});drawRoutes(filter);if(show.length){map.fitBounds(L.featureGroup([...markers.values()]).getBounds().pad(0.16),{animate:true});}}
+let routeLayers=[];function drawRoutes(filter){routeLayers.forEach(l=>map.removeLayer(l));routeLayers=[];function addRoute(day){const pts=items.filter(p=>p.day===day).map(osmCoord);if(pts.length>1)routeLayers.push(L.polyline(pts,{color:dayColors[day],weight:4,opacity:.58,dashArray:day===2?'8 8':null}).addTo(map));}if(filter==='all'){[1,2,3].forEach(addRoute)}else if([1,2,3].includes(Number(filter)))addRoute(Number(filter));}
+function applyFilter(day){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.day===String(day)));document.querySelectorAll('.day-section').forEach(s=>s.style.display=(day==='all'||s.dataset.day===String(day))?'block':'none');document.querySelectorAll('.hotel-section').forEach(s=>s.style.display=(day==='all'||day==='hotel')?'block':'none');drawMarkers(day);if(day!=='all'){const target=day==='hotel'?document.querySelector('.hotel-section'):document.querySelector(`.day-section[data-day="${day}"]`);setTimeout(()=>target?.scrollIntoView({behavior:'smooth',block:'start'}),60);}}
+function focusPlace(id,open=false){const p=allPlaces.find(x=>x.id===id);if(!p)return;const m=markers.get(id);if(!m){applyFilter(p.day||'hotel');setTimeout(()=>focusPlace(id,open),220);return;}map.setView(osmCoord(p), p.day===2?12:14,{animate:true});if(open)m.openPopup();highlightCard(id);}
+function highlightCard(id){document.querySelectorAll('.card,.overview-card').forEach(c=>c.classList.toggle('highlight',c.dataset.id===id));const el=document.querySelector(`[data-id="${id}"]`);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});}
+class LocateControl extends L.Control{onAdd(){const btn=L.DomUtil.create('button','locate');btn.title='定位当前位置';btn.innerHTML='◎';L.DomEvent.disableClickPropagation(btn);btn.onclick=()=>{if(!navigator.geolocation){alert('当前浏览器不支持定位');return;}navigator.geolocation.getCurrentPosition(pos=>{const {latitude,longitude}=pos.coords;L.circleMarker([latitude,longitude],{radius:8,color:'#007aff',fillColor:'#007aff',fillOpacity:.8}).addTo(map).bindPopup('当前位置').openPopup();map.setView([latitude,longitude],14);},()=>alert('定位失败，请检查浏览器权限'));};return btn;}}
+map.addControl(new LocateControl({position:'topleft'}));
+document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>applyFilter(btn.dataset.day)));
+render();drawMarkers('all');
+</script>
+</body>
+</html>
