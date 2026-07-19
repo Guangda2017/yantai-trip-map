@@ -35,6 +35,7 @@ a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
   <button class="tab" data-day="2">Day 2 酒庄</button>
   <button class="tab" data-day="3">Day 3 养马岛</button>
   <button class="tab" data-day="hotel">住宿</button>
+  <button class="tab" data-day="food">餐饮推荐</button>
 </nav>
 <main class="content">
   <section class="hero">
@@ -50,6 +51,9 @@ a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
 
   <h3 class="section-title hotel-section">住宿候选</h3>
   <section class="hotel-list hotel-section" id="hotelList"></section>
+
+  <h3 class="section-title food-section">长辈餐饮推荐</h3>
+  <section class="hotel-list food-section" id="restaurantList"></section>
 
   <section class="day-section" data-day="1">
     <div class="day-head"><h2>Day 1｜市区海岸适应</h2><p>烟台山、朝阳街/所城里、月亮湾，第一天低强度。</p></div>
@@ -91,6 +95,9 @@ const hotels=[
  {id:'h5',name:'烟台百纳瑞汀酒店',lat:37.5358531,lng:121.4087014,type:'hotel',day:'hotel',time:'无星级市区备选',tag:'财政部定点 · 无星级 · OSM已校核',desc:'电话：0535-6862888。财政部列表为无星级；OSM 可识别到百纳瑞汀酒店，市区海岸线附近，位置便利。'},
  {id:'h6',name:'烟台中心大酒店',lat:37.5380237,lng:121.3812527,type:'hotel',day:'hotel',time:'舒适备选',tag:'财政部定点 · 4星 · OSM已校核',desc:'电话：0535-6584868。OSM 可识别到中心大酒店；预算稍宽松时可选，市区配套通常更稳。'}
 ];
+const restaurants=[
+ {id:'r1',name:'万盛合饭店（渔人码头店）',lat:37.5183674,lng:121.4473423,type:'food',day:'food',time:'Day 3｜养马岛返程晚餐首选',tag:'长辈友好 · 需避峰',desc:'具体位置：山东省烟台市莱山区滨海中路45号渔人码头内（地图点位为渔人码头区域）。适合养马岛返程后看海、吃一顿正式鲁菜；建议海肠捞饭（可点小份）、葱烧海参、炸春卷和时蔬。小红书近期实测午间曾排约14桌、等约1小时，建议11:00前到或提前电话确认。来源：小红书《打卡鲁菜天花板｜万盛合饭店》 https://www.xiaohongshu.com/explore/69f46049000000001f00295b'}
+];
 const items=[
  {id:'d1a',day:1,time:'11:30',name:'Day1午餐区域：市区鲁菜/海鲜家常菜',lat:37.5429799,lng:121.3965513,type:'food',tag:'午餐',desc:'候选：蓬莱春、东顺馆、旺角小渔村市区店、酒店附近鲁菜馆。长辈友好点法：鲅鱼水饺、海鲜疙瘩汤、清蒸鱼、炒时蔬；第一顿少吃凉拌贝类和生腌。'},
  {id:'d1b',day:1,time:'14:00',name:'烟台山景区',lat:37.5470425,lng:121.3965291,type:'spot',tag:'景点',desc:'看海、老建筑、灯塔，走核心区即可，1.5—2小时。'},
@@ -105,10 +112,10 @@ const items=[
  {id:'d3a',day:3,time:'09:00',name:'酒店 → 养马岛',lat:37.4658736,lng:121.6205904,type:'transport',tag:'出发',desc:'岛上以坐车环岛 + 挑点下车看海为主，不全程步行。'},
  {id:'d3b',day:3,time:'10:00',name:'养马岛',lat:37.4658736,lng:121.6205904,type:'spot',tag:'看海',desc:'选2—3个海景点即可，风大带外套。'},
  {id:'d3c',day:3,time:'12:30',name:'养马岛/牟平午餐区域',lat:37.4558000,lng:121.5920000,type:'food',tag:'午餐',desc:'候选：养马岛岛内渔家乐、牟平区本地海鲜家常菜、胶东家常菜馆。点热菜、鱼、鲅鱼水饺/面食和汤；不建议吃太多冷盘贝类。'},
- {id:'d3d',day:3,time:'15:00',name:'烟台渔人码头 / 第二海水浴场',lat:37.5183674,lng:121.4473423,type:'spot',tag:'下午备选',desc:'喜欢拍照选渔人码头；体力一般选海水浴场。当天返程则直接回酒店取行李。'},
+ {id:'d3d',day:3,time:'15:00',name:'烟台渔人码头 / 第二海水浴场',lat:37.5183674,lng:121.4473423,type:'spot',tag:'下午备选',desc:'喜欢拍照选渔人码头；体力一般选海水浴场。当天返程则直接回酒店取行李。餐饮请切换至“餐饮推荐”页签查看万盛合饭店（渔人码头店）。'},
  {id:'d3e',day:3,time:'17:30',name:'返程前简餐',lat:37.5380237,lng:121.3812527,type:'food',tag:'晚餐',desc:'候选：福山大面、鲅鱼水饺、酒店附近简餐/鲁菜。返程日以离酒店或车站近、不排队、不耽误交通为第一原则。'}
 ];
-const allPlaces=[...hotels,...items];
+const allPlaces=[...hotels,...restaurants,...items];
 const dayColors={1:'#ff9500',2:'#34c759',3:'#af52de',hotel:'#7c3aed'};
 const map=new AMap.Map('map',{zoom:10,center:[121.25,37.55],viewMode:'2D',resizeEnable:true,zoomEnable:true});
 const markers=new Map();let routeLayers=[];let infoWindow=null;let userMarker=null;
@@ -123,12 +130,12 @@ function amapUrl(p){return `https://uri.amap.com/search?keyword=${encodeURICompo
 function markerContent(p){const color=p.type==='hotel'?'#7c3aed':p.type==='food'?'#ff3b30':p.type==='transport'?'#8e8e93':dayColors[p.day]||'#007aff';const label=p.type==='hotel'?'住':p.type==='food'?'食':p.type==='transport'?'车':p.day;return `<div style="width:28px;height:28px;border-radius:50%;background:${color};border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.28);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:12px">${label}</div>`;}
 function popupHtml(p){return `<div style="max-width:270px;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;font-size:14px;line-height:1.45"><b>${p.name}</b><br><span style="color:#667085">${p.time||''} ${p.tag||''}</span><br>${p.desc}<br><br><a style="color:#0071e3" href="${amapUrl(p)}" target="_blank">高德搜索/导航</a></div>`;}
 function makeCard(p){return `<div class="tl-item" data-id="${p.id}"><span class="dot ${p.type}"></span><article class="card" data-id="${p.id}"><div class="time">${p.time}</div><div class="name">${p.name}<span class="badge ${p.type}">${p.tag}</span></div><div class="desc">${p.desc}</div><div class="links"><a class="btn ${p.type==='food'?'food':''}" href="${amapUrl(p)}" target="_blank">高德搜索/导航</a></div></article></div>`;}
-function render(){document.getElementById('hotelList').innerHTML=hotels.map(p=>`<article class="overview-card" data-id="${p.id}"><div class="time">${p.time}</div><div class="name">${p.name}<span class="badge hotel">${p.tag}</span></div><div class="desc">${p.desc}</div><div class="links"><a class="btn" href="${amapUrl(p)}" target="_blank">高德搜索/导航</a></div></article>`).join('');[1,2,3].forEach(d=>{document.getElementById('day'+d).innerHTML=items.filter(p=>p.day===d).map(makeCard).join('')});document.querySelectorAll('[data-id]').forEach(el=>el.addEventListener('click',e=>{if(e.target.tagName==='A')return;focusPlace(el.dataset.id,true);}));}
+function render(){document.getElementById('hotelList').innerHTML=hotels.map(p=>`<article class="overview-card" data-id="${p.id}"><div class="time">${p.time}</div><div class="name">${p.name}<span class="badge hotel">${p.tag}</span></div><div class="desc">${p.desc}</div><div class="links"><a class="btn" href="${amapUrl(p)}" target="_blank">高德搜索/导航</a></div></article>`).join('');document.getElementById('restaurantList').innerHTML=restaurants.map(p=>`<article class="overview-card" data-id="${p.id}"><div class="time">${p.time}</div><div class="name">${p.name}<span class="badge food">${p.tag}</span></div><div class="desc">${p.desc}</div><div class="links"><a class="btn food" href="${amapUrl(p)}" target="_blank">高德搜索/导航</a></div></article>`).join('');[1,2,3].forEach(d=>{document.getElementById('day'+d).innerHTML=items.filter(p=>p.day===d).map(makeCard).join('')});document.querySelectorAll('[data-id]').forEach(el=>el.addEventListener('click',e=>{if(e.target.tagName==='A')return;focusPlace(el.dataset.id,true);}));}
 function clearMap(){markers.forEach(m=>m.setMap(null));markers.clear();routeLayers.forEach(l=>l.setMap(null));routeLayers=[];}
 function drawRoutes(filter){function addRoute(day){const path=items.filter(p=>p.day===day).map(amapCoord);if(path.length>1){const line=new AMap.Polyline({path,strokeColor:dayColors[day],strokeWeight:4,strokeOpacity:.58,strokeStyle:day===2?'dashed':'solid',lineJoin:'round'});line.setMap(map);routeLayers.push(line);}}if(filter==='all')[1,2,3].forEach(addRoute);else if([1,2,3].includes(Number(filter)))addRoute(Number(filter));}
 function drawMarkers(filter='all'){clearMap();const show=allPlaces.filter(p=>filter==='all'||String(p.day)===String(filter)||(filter==='hotel'&&p.type==='hotel'));show.forEach(p=>{const m=new AMap.Marker({position:amapCoord(p),content:markerContent(p),offset:new AMap.Pixel(-14,-14),title:p.name});m.on('click',()=>{openInfo(p,m);highlightCard(p.id);});m.setMap(map);markers.set(p.id,m);});drawRoutes(filter);const overlays=[...markers.values(),...routeLayers];if(overlays.length)map.setFitView(overlays,false,[45,45,45,45]);}
 function openInfo(p,m){if(!infoWindow)infoWindow=new AMap.InfoWindow({offset:new AMap.Pixel(0,-28)});infoWindow.setContent(popupHtml(p));infoWindow.open(map,m.getPosition());}
-function applyFilter(day){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.day===String(day)));document.querySelectorAll('.day-section').forEach(s=>s.style.display=(day==='all'||s.dataset.day===String(day))?'block':'none');document.querySelectorAll('.hotel-section').forEach(s=>s.style.display=(day==='all'||day==='hotel')?'block':'none');drawMarkers(day);if(day!=='all'){const target=day==='hotel'?document.querySelector('.hotel-section'):document.querySelector(`.day-section[data-day="${day}"]`);setTimeout(()=>target?.scrollIntoView({behavior:'smooth',block:'start'}),60);}}
+function applyFilter(day){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.day===String(day)));document.querySelectorAll('.day-section').forEach(s=>s.style.display=(day==='all'||s.dataset.day===String(day))?'block':'none');document.querySelectorAll('.hotel-section').forEach(s=>s.style.display=(day==='all'||day==='hotel')?'block':'none');document.querySelectorAll('.food-section').forEach(s=>s.style.display=(day==='all'||day==='food')?'block':'none');drawMarkers(day);if(day!=='all'){const target=day==='hotel'?document.querySelector('.hotel-section'):day==='food'?document.querySelector('.food-section'):document.querySelector(`.day-section[data-day="${day}"]`);setTimeout(()=>target?.scrollIntoView({behavior:'smooth',block:'start'}),60);}}
 function focusPlace(id,open=false){const p=allPlaces.find(x=>x.id===id);if(!p)return;const m=markers.get(id);if(!m){applyFilter(p.day||'hotel');setTimeout(()=>focusPlace(id,open),220);return;}map.setZoomAndCenter(p.day===2?12:14,amapCoord(p));if(open)openInfo(p,m);highlightCard(id);}
 function highlightCard(id){document.querySelectorAll('.card,.overview-card').forEach(c=>c.classList.toggle('highlight',c.dataset.id===id));const el=document.querySelector(`[data-id="${id}"]`);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});}
 function locateUser(){if(!navigator.geolocation){alert('当前浏览器不支持定位');return;}navigator.geolocation.getCurrentPosition(pos=>{const point=wgs84ToGcj02(pos.coords.latitude,pos.coords.longitude);if(userMarker)userMarker.setMap(null);userMarker=new AMap.Marker({position:point,content:'<div style="width:16px;height:16px;border-radius:50%;background:#007aff;border:3px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.35)"></div>',offset:new AMap.Pixel(-8,-8)});userMarker.setMap(map);map.setZoomAndCenter(14,point);},()=>alert('定位失败，请检查浏览器权限'));}
