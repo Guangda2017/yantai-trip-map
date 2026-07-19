@@ -2,13 +2,6 @@
 
 本目录已经是一个可直接发布的静态网站：`index.html` 位于项目根目录，不需要安装 Node.js 或执行构建命令。
 
-## 一次性发布
-
-在本目录打开终端后执行：
-
-```bash
-cd /Users/stephen/.openclaw/workspace_helper/deploy/yantai-trip-map
-
 git init
 git add .
 git commit -m "发布烟台行程地图"
@@ -26,19 +19,6 @@ gh repo create yantai-trip-map --public --source=. --remote=origin --push
 ```text
 https://<GitHub用户名>.github.io/yantai-trip-map/
 ```
-
-## 更新网站
-
-每次修改 `index.html` 后：
-
-```bash
-cd /Users/stephen/.openclaw/workspace_helper/deploy/yantai-trip-map
-git add index.html
-git commit -m "更新行程地图"
-git push
-```
-
-GitHub Pages 会自动更新；原链接保持不变。
 
 ## 改成私有分享
 
