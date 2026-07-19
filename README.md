@@ -9,7 +9,6 @@
 ├── index.html       # 网站首页与地图正文
 ├── .nojekyll        # 告知 GitHub Pages 不使用 Jekyll 处理
 ├── README.md        # 项目说明
-├── DEPLOY.md        # GitHub Pages 发布步骤
 └── .gitignore       # 本地系统文件忽略规则
 ```
 
