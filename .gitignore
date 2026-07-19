@@ -8,3 +8,6 @@
 # Temporary files
 *.swp
 *.tmp
+
+# Local AMap development page (contains development key)
+index.local.html
